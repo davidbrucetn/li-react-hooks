@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import { FaStar } from "react-icons/fa";
@@ -52,8 +52,45 @@ function App() {
   //Part 2b Building a checkbox with useState
   const [checked, setChecked] = useState(false);
 
+  //Part 3a useEffect
+  const [name, setName] = useState("Cori");
+  const [admin, setAdmin] = useState(false);
 
+  useEffect(() => {
+    document.title = `Celebrate ${name}`;
+  }, [name]);
 
+  useEffect(() => {
+    console.log(`The user is: ${admin ? "Admin" : "Not Admin"}`);
+  }, [admin])
+
+  //Part 3c fetching with useEffect
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users`)
+      .then((response) => response.json())
+      .then(setData);
+  }, [])
+
+  function GetAPIdata() {
+    if (data) {
+      return (
+        <div>
+          <ul>
+            {data.map((user) => (
+              <li key={user.id}>{user.login}</li>
+            ))}
+          </ul>
+          <button onClick={() => setData([])}>Remove Data</button>
+        </div>
+      )
+    } else {
+      return (
+        <p>No Users</p>
+      )
+    }
+  }
 
   return (
     <div key="div__app">
@@ -82,7 +119,21 @@ function App() {
         <StarRating totalStars={4} />
 
       </div>
-
+      <hr />
+      <div key="div__useEffect__dependencyArray">
+        <section>
+          <h2>Dependency Array and useEffect</h2>
+          <p>Congratulations {name}!</p>
+          <button onClick={() => setName("Alex")}>Change Winner</button>
+          <p>{admin ? "Logged In" : "Not Logged In"}</p>
+          <button onClick={() => setAdmin(true)}>Log In</button>
+        </section>
+      </div>
+      <hr />
+      <div key="div__useEffect__fetch">
+        <h2>useEffect Fetch</h2>
+        <GetAPIdata />
+      </div>
 
     </div>
   )
