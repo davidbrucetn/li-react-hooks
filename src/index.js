@@ -1,149 +1,76 @@
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import { FaStar } from "react-icons/fa";
+//Part 5e custom fetch component
+import { useFetch } from "./useFetch";
+
+import App from "./App";
 
 // import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-const people = ["Alex", "Cori", "David", "Sarah", "John"];
-console.log(people[2])
-// destructure array
-const [, second, third] = ["Alex", "Cori", "David", "Sarah", "John"];
-console.log(second)
 
 
-//Part 2c Working with component trees
-const createArray = (length) => [
-  ...Array(length)
-];
+//Part 5b Placing Data in Context
+export const TreesContext = createContext();
 
-function Star({ selected = false, onSelect }) {
+const trees = [
+  { id: "1", type: "Maple" },
+  { id: "2", type: "Oak" },
+  { id: "3", type: "Family" },
+  { id: "4", type: "Component" }
+]
 
-  return <FaStar
-    color={selected ? "red" : "darkgrey"}
-    onClick={onSelect}
-  />
-}
+//Part 5d Creating a custom Hook with context
+const CarsContext = createContext();
+export const useCars = () => useContext(CarsContext)
 
-function StarRating({ totalStars = 5 }) {
-  const [selectedStars, setSelectedStars] = useState(0)
+const cars = [
+  { id: "1", type: "Honda" },
+  { id: "2", type: "Toyota" },
+  { id: "3", type: "Tesla" },
+  { id: "4", type: "General Motors" }
+]
+
+function FetchApp({ login }) {
+  //Part 5e Data Fetching with a Fetch
+  //Three possible states:
+  //If the data isn't available but is loading...
+  //If we get the data...
+  //If there's an error...
+
+  const { loading, data, error } = useFetch(`https://api.github.com/users/${login}`);
+  if (loading) return <h1>Loading...</h1>;
+  if (error) return <pre>{JSON.stringify(error, null, 2)}</pre>;
   return (
-    <>
-      {createArray(totalStars).map((n, i) => (
-        <Star
-          key={i}
-          selected={selectedStars > i}
-          onSelect={() => setSelectedStars(i + 1)}
-        />
-      ))}
-      <p>{selectedStars} of {totalStars}</p>
-    </>
-  )
-}
-
-
-
-
-function App() {
-  //Part 2a Incorporating the useState hook
-  const [status, setStatus] = useState("Not Delivered");
-
-  //Part 2b Building a checkbox with useState
-  const [checked, setChecked] = useState(false);
-
-  //Part 3a useEffect
-  const [name, setName] = useState("Cori");
-  const [admin, setAdmin] = useState(false);
-
-  useEffect(() => {
-    document.title = `Celebrate ${name}`;
-  }, [name]);
-
-  useEffect(() => {
-    console.log(`The user is: ${admin ? "Admin" : "Not Admin"}`);
-  }, [admin])
-
-  //Part 3c fetching with useEffect
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    fetch(`https://api.github.com/users`)
-      .then((response) => response.json())
-      .then(setData);
-  }, [])
-
-  function GetAPIdata() {
-    if (data) {
-      return (
-        <div>
-          <ul>
-            {data.map((user) => (
-              <li key={user.id}>{user.login}</li>
-            ))}
-          </ul>
-          <button onClick={() => setData([])}>Remove Data</button>
-        </div>
-      )
-    } else {
-      return (
-        <p>No Users</p>
-      )
-    }
-  }
-
-  return (
-    <div key="div__app">
-
-      <hr />
-      <div key="div__delivered">
-        <h1>The package is: {status}</h1>
-        <button onClick={() => setStatus("Delivered")}>Deliver</button>
-        <button onClick={() => setStatus("Not Delivered")}>Reset</button>
+    <div>
+      <h2>Building a fetch component</h2>
+      {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
+      <img
+        src={data.avatar_url}
+        alt={data.login}
+      />
+      <div>
+        <h2>{data.login}</h2>
+        {data.name && <p>{data.name}</p>}
       </div>
-      <hr />
-      <div key="div__input">
-        <h2>Building a checkbox with useState</h2>
-        <input
-          type="checkbox"
-          value={checked}
-          onChange={() =>
-            setChecked((checked) => !checked)
-          }
-        />
-        <p>{checked ? "Checked" : "Not Checked"}</p>
-      </div>
-      <hr />
-      <div key="div__componentTree">
-        <h2>Star Rating Component Tree</h2>
-        <StarRating totalStars={4} />
-
-      </div>
-      <hr />
-      <div key="div__useEffect__dependencyArray">
-        <section>
-          <h2>Dependency Array and useEffect</h2>
-          <p>Congratulations {name}!</p>
-          <button onClick={() => setName("Alex")}>Change Winner</button>
-          <p>{admin ? "Logged In" : "Not Logged In"}</p>
-          <button onClick={() => setAdmin(true)}>Log In</button>
-        </section>
-      </div>
-      <hr />
-      <div key="div__useEffect__fetch">
-        <h2>useEffect Fetch</h2>
-        <GetAPIdata />
-      </div>
-
     </div>
-  )
+  );
 }
+
 
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  // <React.StrictMode>
+  //Part 5b Placing Data in Context with Provider
+  <CarsContext.Provider value={{ cars }}>
+    <TreesContext.Provider value={{ trees }}>
+      <App />
+      <FetchApp login="davidbrucetn" />
+    </TreesContext.Provider>
+  </CarsContext.Provider>,
+
+  // </React.StrictMode>,
   document.getElementById('root')
 );
 
